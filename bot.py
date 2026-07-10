@@ -398,16 +398,12 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             parse_mode="Markdown"
         )
 
-async def post_init(application: Application) -> None:
-    """Setup webhook after application starts"""
-    logger.info("markspt_bot started successfully!")
-
 # ============ MAIN FUNCTION ============
 
 def main() -> None:
     """Start the bot"""
     # Create application
-    application = Application.builder().token(config.BOT_TOKEN).post_init(post_init).build()
+    application = Application.builder().token(config.BOT_TOKEN).build()
 
     # Command handlers
     application.add_handler(CommandHandler("start", start_command))
@@ -422,14 +418,8 @@ def main() -> None:
     # Error handler
     application.add_error_handler(error_handler)
 
-    # Start webhook (for Render)
-    if config.BOT_TOKEN:
-        application.run_webhook(
-            listen="0.0.0.0",
-            port=config.PORT,
-            url_path=config.BOT_TOKEN,
-            webhook_url=f"https://markspt.onrender.com/{config.BOT_TOKEN}"
-        )
+    # Start polling (works better on Render)
+    application.run_polling()
 
 if __name__ == "__main__":
     main()
